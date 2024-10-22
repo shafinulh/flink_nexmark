@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  jobmanager:
+    image: flink-nexmark
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092  # Use internal Kafka address
+    networks:
+      - nexmark-network
+    extra_hosts:
+      - "kafka1:172.18.0.3"  # Optionally map Kafka address
+
+  taskmanager:
+    image: flink-nexmark
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092  # Use internal Kafka address
+    networks:
+      - nexmark-network
+    extra_hosts:
+      - "kafka1:172.18.0.3"  # Optionally map Kafka address
+
+networks:
+  nexmark-network:
+    external: true
+    name: nexmark-bench_default  # Make sure this matches your Kafka network name
