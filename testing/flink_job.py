@@ -31,7 +31,7 @@ def main():
     t_env.get_config().set_local_timezone("UTC")
 
     # Set parallelism
-    env.set_parallelism(2)  # Adjust based on your cluster resources
+    env.set_parallelism(1)  # Adjust based on your cluster resources
 
     # Execute SQL statements
     with open('/opt/flink/sql/q3.sql', 'r') as f:
