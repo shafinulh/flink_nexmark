@@ -28,7 +28,6 @@ RUN pip install --no-cache-dir -r /opt/flink/requirements.txt
 
 # Copy the Python script and SQL file
 COPY flink_job.py /opt/flink/
-COPY sql/q1.sql /opt/flink/sql/
 COPY sql/q3.sql /opt/flink/sql/
 
 # Set the working directory
