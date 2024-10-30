@@ -74,22 +74,34 @@ SELECT
     auction.extra
 FROM nexmark_events WHERE event_type = 1;
 
--- Create the output sink
+-- Create the PostgreSQL sink table
 CREATE TABLE q3_sink (
     name VARCHAR,
     city VARCHAR,
     state VARCHAR,
-    id BIGINT
+    id BIGINT,
+    processing_time TIMESTAMP(3),
+    PRIMARY KEY (id) NOT ENFORCED
 ) WITH (
-    'connector' = 'blackhole'
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://postgres:5432/nexmark',
+    'table-name' = 'nexmark.q3_results',
+    'username' = 'postgres',
+    'password' = 'postgres',
+    'sink.parallelism' = '1',
+    'sink.buffer-flush.interval' = '1s'
 );
 
--- Query 3: 
+-- Modified query with processing time
 INSERT INTO q3_sink
 SELECT
-    P.name, P.city, P.state, A.id
+    P.name, 
+    P.city, 
+    P.state, 
+    A.id,
+    PROCTIME() as processing_time
 FROM
     auction AS A 
     INNER JOIN person AS P ON A.seller = P.id
 WHERE
-    A.category = 10 AND (P.state = 'OR' OR P.state = 'ID' OR P.state = 'CA');
+    A.category = 10 AND (P.state = 'or' OR P.state = 'id' OR P.state = 'ca');

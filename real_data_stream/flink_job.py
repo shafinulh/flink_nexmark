@@ -17,8 +17,13 @@ def main():
     rocks_db_state_backend = RocksDBStateBackend("file:///tmp/flink-rockdb-checkpoints", True)
     env.set_state_backend(rocks_db_state_backend)
 
-    # Add Kafka connector jar
-    t_env.get_config().get_configuration().set_string("pipeline.jars", "file:///opt/flink/lib/flink-sql-connector-kafka-1.17.0.jar")
+    # Add Kafka and JDBC connectors
+    t_env.get_config().get_configuration().set_string(
+        "pipeline.jars", 
+        "file:///opt/flink/lib/flink-sql-connector-kafka-1.17.0.jar;"
+        "file:///opt/flink/lib/flink-connector-jdbc-3.0.0-1.16.jar;"
+        "file:///opt/flink/lib/postgresql-42.6.0.jar"
+    )
 
     # Set up checkpointing and state backend
     env.enable_checkpointing(60000)  # Checkpoint every 60 seconds
@@ -26,7 +31,7 @@ def main():
     t_env.get_config().set_local_timezone("UTC")
 
     # Set parallelism
-    env.set_parallelism(2)  # Adjust based on your cluster resources
+    env.set_parallelism(1)  # Adjust based on your cluster resources
 
     # Execute SQL statements
     with open('/opt/flink/sql/q3.sql', 'r') as f:
@@ -38,6 +43,6 @@ def main():
             logger.info(f"Executing SQL: {statement}")
             t_env.execute_sql(statement)
 
-    logger.info("Flink job for Query 1 completed setup. Waiting for data...")
+    logger.info("Flink job completed setup. Waiting for data...")
 if __name__ == '__main__':
     main()
