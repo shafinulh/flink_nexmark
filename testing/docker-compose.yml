@@ -29,7 +29,7 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2
+        taskmanager.numberOfTaskSlots: 1
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     networks:
       - nexmark-network

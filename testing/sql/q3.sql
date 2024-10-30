@@ -35,7 +35,7 @@ CREATE TABLE nexmark_events (
             WHEN event_type = 1 THEN auction.dateTime
             ELSE bid.dateTime
         END,
-    WATERMARK FOR dateTime AS dateTime - INTERVAL '80' SECOND
+    WATERMARK FOR dateTime AS dateTime - INTERVAL '20' SECOND
 ) WITH (
     'connector' = 'kafka',
     'topic' = 'nexmark-events',

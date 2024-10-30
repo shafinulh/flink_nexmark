@@ -36,10 +36,18 @@ docker-compose exec postgres psql -U postgres -d nexmark -c "\dt nexmark.*"
 
 ### generate the test data
 ```
-docker-compose exec -it jobmanager python test_data_generator.py --bootstrap-servers kafka:9092
-    --num-persons 10 \
-    --num-auctions 20 \
-    ...
+docker-compose exec -it jobmanager python test_data_generator.py --bootstrap-servers kafka:9092 \
+    --num-persons 100 \
+    --num-auctions 1000000 \
+    --save-json
+```
+
+### viewing the test data
+```
+docker-compose exec kafka kafka-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --topic nexmark-events \
+    --from-beginning > datagen.log
 ```
 
 ### run the flink job
