@@ -9,3 +9,9 @@ scrape_configs:
         - 'jobmanager:9249'
         - 'taskmanager:9249'
     metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(?::\d+)?'
+        replacement: '${1}'
