@@ -9,11 +9,14 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092  # Use internal Kafka address
+        metrics.reporters: prom
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+        metrics.reporter.prom.port: 9249
+      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
     networks:
       - nexmark-network
     extra_hosts:
-      - "kafka1:172.18.0.3"  # Optionally map Kafka address
+      - "kafka1:172.18.0.3"
 
   taskmanager:
     image: flink-nexmark
@@ -25,12 +28,46 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 1
-      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092  # Use internal Kafka address
+        taskmanager.numberOfTaskSlots: 2
+        metrics.reporters: prom
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+        metrics.reporter.prom.port: 9249
+      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
     networks:
       - nexmark-network
     extra_hosts:
-      - "kafka1:172.18.0.3"  # Optionally map Kafka address
+      - "kafka1:172.18.0.3"
+
+  prometheus:
+    image: prom/prometheus:v2.44.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - nexmark-network
+
+  grafana:
+    image: grafana/grafana:9.5.2
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - grafana_data:/var/lib/grafana
+    networks:
+      - nexmark-network
+    depends_on:
+      - prometheus
   
   postgres:
     image: postgres:14
@@ -56,7 +93,9 @@ services:
 networks:
   nexmark-network:
     external: true
-    name: nexmark-bench_default  # Make sure this matches your Kafka network name
+    name: nexmark-bench_default
 
 volumes:
+  prometheus_data:
+  grafana_data:
   postgres_data:
