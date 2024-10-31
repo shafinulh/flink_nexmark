@@ -17,6 +17,30 @@ def main():
     rocks_db_state_backend = RocksDBStateBackend("file:///tmp/flink-rockdb-checkpoints", True)
     env.set_state_backend(rocks_db_state_backend)
 
+    # Configure RocksDB metrics using the table environment configuration
+    configuration = t_env.get_config().get_configuration()
+    
+    # RocksDB Cache Metrics
+    configuration.set_string("state.backend.rocksdb.metrics.block-cache-hit", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.block-cache-miss", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.block-cache-usage", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.block-cache-capacity", "true")
+    
+    # RocksDB I/O Metrics
+    configuration.set_string("state.backend.rocksdb.metrics.bytes-read", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.bytes-written", "true")
+    
+    # RocksDB Memory & State Size Metrics
+    configuration.set_string("state.backend.rocksdb.metrics.cur-size-all-mem-tables", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.size-all-mem-tables", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.estimate-table-readers-mem", "true")
+    
+    # RocksDB Compaction Metrics
+    configuration.set_string("state.backend.rocksdb.metrics.num-running-compactions", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.num-running-flushes", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.compaction-pending", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.estimate-pending-compaction-bytes", "true")
+
     # Add Kafka and JDBC connectors
     t_env.get_config().get_configuration().set_string(
         "pipeline.jars", 
