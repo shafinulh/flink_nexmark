@@ -48,7 +48,8 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.numberOfTaskManagers: 1
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
@@ -64,6 +65,7 @@ services:
         state.backend.rocksdb.metrics.cur-size-all-mem-tables: true
         state.backend.rocksdb.metrics.size-all-mem-tables: true
         state.backend.rocksdb.metrics.estimate-table-readers-mem: true
+        state.backend.rocksdb.metrics.mem-table-flush-pending: true
         # RocksDB Compaction Metrics
         state.backend.rocksdb.metrics.num-running-compactions: true
         state.backend.rocksdb.metrics.num-running-flushes: true

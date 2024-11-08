@@ -42,7 +42,6 @@ CREATE TABLE nexmark_events (
     'properties.bootstrap.servers' = 'kafka1:19092',
     'properties.group.id' = 'nexmark-flink-consumer',
     'scan.startup.mode' = 'earliest-offset',
-    'sink.partitioner' = 'fixed',
     'format' = 'json'
 );
 
