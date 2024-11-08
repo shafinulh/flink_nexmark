@@ -108,8 +108,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "flink_taskmanager_job_task_numRecordsInPerSecond",
-          "legendFormat": "Input - {{ operator_name || 'Unknown' }}",
+          "expr": "sum by (task_name) (flink_taskmanager_job_task_numRecordsInPerSecond)",
+          "legendFormat": "{{task_name}}",
           "refId": "A"
         },
         {
@@ -117,8 +117,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "flink_taskmanager_job_task_numRecordsOutPerSecond",
-          "legendFormat": "Output - {{ operator_name || 'Unknown' }}",
+          "expr": "sum by (task_name) (flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "legendFormat": "{{task_name}}",
           "refId": "B"
         }
       ],

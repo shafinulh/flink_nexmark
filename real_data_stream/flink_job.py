@@ -34,6 +34,7 @@ def main():
     configuration.set_string("state.backend.rocksdb.metrics.cur-size-all-mem-tables", "true")
     configuration.set_string("state.backend.rocksdb.metrics.size-all-mem-tables", "true")
     configuration.set_string("state.backend.rocksdb.metrics.estimate-table-readers-mem", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.mem-table-flush-pending", "true")
     
     # RocksDB Compaction Metrics
     configuration.set_string("state.backend.rocksdb.metrics.num-running-compactions", "true")
@@ -50,12 +51,20 @@ def main():
     )
 
     # Set up checkpointing and state backend
-    env.enable_checkpointing(60000)  # Checkpoint every 60 seconds
-    env.get_checkpoint_config().set_min_pause_between_checkpoints(30000)
+    # env.enable_checkpointing(60000)  # Checkpoint every 60 seconds
+    # env.get_checkpoint_config().set_min_pause_between_checkpoints(30000)
     t_env.get_config().set_local_timezone("UTC")
 
     # Set parallelism
-    env.set_parallelism(2)  # Adjust based on your cluster resources
+    # env.set_parallelism(4) 
+    # t_env.get_config().get_configuration().set_string('table.exec.resource.default-parallelism', '4')
+    t_env.get_config().get_configuration().set_string(
+        "table.exec.resource.source-parallelism", "2")
+    
+    # Set join parallelism
+    t_env.get_config().get_configuration().set_string(
+        "table.exec.resource.default-parallelism", "4")
+
 
     # Execute SQL statements
     with open('/opt/flink/sql/q3.sql', 'r') as f:
