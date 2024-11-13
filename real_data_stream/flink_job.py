@@ -34,13 +34,20 @@ def main():
     configuration.set_string("state.backend.rocksdb.metrics.cur-size-all-mem-tables", "true")
     configuration.set_string("state.backend.rocksdb.metrics.size-all-mem-tables", "true")
     configuration.set_string("state.backend.rocksdb.metrics.estimate-table-readers-mem", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.mem-table-flush-pending", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.is-write-stopped", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.num-entries-active-mem-table", "true")
     
     # RocksDB Compaction Metrics
     configuration.set_string("state.backend.rocksdb.metrics.num-running-compactions", "true")
     configuration.set_string("state.backend.rocksdb.metrics.num-running-flushes", "true")
     configuration.set_string("state.backend.rocksdb.metrics.compaction-pending", "true")
     configuration.set_string("state.backend.rocksdb.metrics.estimate-pending-compaction-bytes", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.compaction-write-bytes", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.compaction-read-bytes", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.estimate-num-keys", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.estimate-live-data-size", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.num-snapshots", "true")
+    configuration.set_string("state.backend.rocksdb.metrics.stall-micros", "true")
 
     # Add Kafka and JDBC connectors
     t_env.get_config().get_configuration().set_string(
@@ -56,15 +63,7 @@ def main():
     t_env.get_config().set_local_timezone("UTC")
 
     # Set parallelism
-    # env.set_parallelism(4) 
-    # t_env.get_config().get_configuration().set_string('table.exec.resource.default-parallelism', '4')
-    t_env.get_config().get_configuration().set_string(
-        "table.exec.resource.source-parallelism", "2")
-    
-    # Set join parallelism
-    t_env.get_config().get_configuration().set_string(
-        "table.exec.resource.default-parallelism", "4")
-
+    env.set_parallelism(1) 
 
     # Execute SQL statements
     with open('/opt/flink/sql/q3.sql', 'r') as f:
