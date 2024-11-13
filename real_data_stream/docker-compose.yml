@@ -25,11 +25,19 @@ services:
         state.backend.rocksdb.metrics.cur-size-all-mem-tables: true
         state.backend.rocksdb.metrics.size-all-mem-tables: true
         state.backend.rocksdb.metrics.estimate-table-readers-mem: true
+        state.backend.rocksdb.metrics.is-write-stopped: true
+        state.backend.rocksdb.metrics.num-entries-active-mem-table: true
         # RocksDB Compaction Metrics
         state.backend.rocksdb.metrics.num-running-compactions: true
         state.backend.rocksdb.metrics.num-running-flushes: true
         state.backend.rocksdb.metrics.compaction-pending: true
         state.backend.rocksdb.metrics.estimate-pending-compaction-bytes: true
+        state.backend.rocksdb.metrics.compaction-write-bytes: true
+        state.backend.rocksdb.metrics.compaction-read-bytes: true
+        state.backend.rocksdb.metrics.estimate-num-keys: true
+        state.backend.rocksdb.metrics.estimate-live-data-size: true
+        state.backend.rocksdb.metrics.num-snapshots: true
+        state.backend.rocksdb.metrics.stall-micros: true
       - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
     networks:
       - nexmark-network
@@ -48,7 +56,8 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 4
+        taskmanager.cpu.cores: 8.0 
+        taskmanager.numberOfTaskSlots: 2
         taskmanager.numberOfTaskManagers: 1
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
@@ -65,12 +74,19 @@ services:
         state.backend.rocksdb.metrics.cur-size-all-mem-tables: true
         state.backend.rocksdb.metrics.size-all-mem-tables: true
         state.backend.rocksdb.metrics.estimate-table-readers-mem: true
-        state.backend.rocksdb.metrics.mem-table-flush-pending: true
+        state.backend.rocksdb.metrics.is-write-stopped: true
+        state.backend.rocksdb.metrics.num-entries-active-mem-table: true
         # RocksDB Compaction Metrics
         state.backend.rocksdb.metrics.num-running-compactions: true
         state.backend.rocksdb.metrics.num-running-flushes: true
         state.backend.rocksdb.metrics.compaction-pending: true
         state.backend.rocksdb.metrics.estimate-pending-compaction-bytes: true
+        state.backend.rocksdb.metrics.compaction-write-bytes: true
+        state.backend.rocksdb.metrics.compaction-read-bytes: true
+        state.backend.rocksdb.metrics.estimate-num-keys: true
+        state.backend.rocksdb.metrics.estimate-live-data-size: true
+        state.backend.rocksdb.metrics.num-snapshots: true
+        state.backend.rocksdb.metrics.stall-micros: true
       - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
     networks:
       - nexmark-network

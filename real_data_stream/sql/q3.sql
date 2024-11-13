@@ -8,15 +8,15 @@ CREATE TABLE nexmark_events (
         creditCard VARCHAR,
         city VARCHAR,
         state VARCHAR,
-        dateTime TIMESTAMP(3),
+        date_time TIMESTAMP(3),
         extra VARCHAR>,
     auction ROW<
         id BIGINT,
         itemName VARCHAR,
         description VARCHAR,
-        initialBid BIGINT,
+        initial_bid BIGINT,
         reserve BIGINT,
-        dateTime TIMESTAMP(3),
+        date_time TIMESTAMP(3),
         expires TIMESTAMP(3),
         seller BIGINT,
         category BIGINT,
@@ -27,15 +27,15 @@ CREATE TABLE nexmark_events (
         price BIGINT,
         channel VARCHAR,
         url VARCHAR,
-        dateTime TIMESTAMP(3),
+        date_time TIMESTAMP(3),
         extra VARCHAR>,
-    dateTime AS
+    date_time AS
         CASE
-            WHEN event_type = 0 THEN person.dateTime
-            WHEN event_type = 1 THEN auction.dateTime
-            ELSE bid.dateTime
+            WHEN event_type = 0 THEN person.date_time
+            WHEN event_type = 1 THEN auction.date_time
+            ELSE bid.date_time
         END,
-    WATERMARK FOR dateTime AS dateTime - INTERVAL '80' SECOND
+    WATERMARK FOR date_time AS date_time - INTERVAL '4' SECOND
 ) WITH (
     'connector' = 'kafka',
     'topic' = 'nexmark-events',
@@ -54,7 +54,7 @@ SELECT
     person.creditCard,
     person.city,
     person.state,
-    person.dateTime,
+    person.date_time,
     person.extra
 FROM nexmark_events WHERE event_type = 0;
 
@@ -64,9 +64,9 @@ SELECT
     auction.id,
     auction.itemName,
     auction.description,
-    auction.initialBid,
+    auction.initial_bid,
     auction.reserve,
-    auction.dateTime,
+    auction.date_time,
     auction.expires,
     auction.seller,
     auction.category,
@@ -79,6 +79,7 @@ CREATE TABLE q3_sink (
     city VARCHAR,
     state VARCHAR,
     id BIGINT,
+    auction_date_time TIMESTAMP (3),
     processing_time TIMESTAMP(3),
     PRIMARY KEY (id) NOT ENFORCED
 ) WITH (
@@ -87,7 +88,7 @@ CREATE TABLE q3_sink (
     'table-name' = 'nexmark.q3_results',
     'username' = 'postgres',
     'password' = 'postgres',
-    'sink.parallelism' = '2',
+    'sink.parallelism' = '1',
     'sink.buffer-flush.interval' = '1s'
 );
 
@@ -98,6 +99,7 @@ SELECT
     P.city, 
     P.state, 
     A.id,
+    A.date_time,
     PROCTIME() as processing_time
 FROM
     auction AS A 

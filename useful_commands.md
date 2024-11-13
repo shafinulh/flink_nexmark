@@ -7,7 +7,7 @@ nexmark-bench/bin/nexmark-server -c
 
 ### creating the events:
 ```
-nexmark-bench/bin/nexmark-server --event-rate 500000 --max-events 300000000 --num-event-generators 8
+nexmark-bench/bin/nexmark-server --event-rate 1000000 --max-events 900000000 --num-event-generators 20
 ```
 
 ### fresh docker image build
