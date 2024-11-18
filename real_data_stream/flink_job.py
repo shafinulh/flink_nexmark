@@ -19,7 +19,17 @@ def main():
 
     # Configure RocksDB metrics using the table environment configuration
     configuration = t_env.get_config().get_configuration()
-    
+
+    # # Add RocksDB logging configuration
+    # configuration.set_string("state.backend.rocksdb.log.level", "INFO_LEVEL")
+    # configuration.set_string("state.backend.rocksdb.log.max-file-size", "10485760")  # 10MB
+    # configuration.set_string("state.backend.rocksdb.log.dir", "/opt/flink/log/rocksdb")
+
+    # # Add RocksDB logger configuration
+    # configuration.set_string("rootLogger.level", "INFO")
+    # configuration.set_string("logger.rocksdb.name", "org.rocksdb")
+    # configuration.set_string("logger.rocksdb.level", "INFO")
+
     # RocksDB Cache Metrics
     configuration.set_string("state.backend.rocksdb.metrics.block-cache-hit", "true")
     configuration.set_string("state.backend.rocksdb.metrics.block-cache-miss", "true")
@@ -36,18 +46,6 @@ def main():
     configuration.set_string("state.backend.rocksdb.metrics.estimate-table-readers-mem", "true")
     configuration.set_string("state.backend.rocksdb.metrics.is-write-stopped", "true")
     configuration.set_string("state.backend.rocksdb.metrics.num-entries-active-mem-table", "true")
-    
-    # RocksDB Compaction Metrics
-    configuration.set_string("state.backend.rocksdb.metrics.num-running-compactions", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.num-running-flushes", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.compaction-pending", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.estimate-pending-compaction-bytes", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.compaction-write-bytes", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.compaction-read-bytes", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.estimate-num-keys", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.estimate-live-data-size", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.num-snapshots", "true")
-    configuration.set_string("state.backend.rocksdb.metrics.stall-micros", "true")
 
     # Add Kafka and JDBC connectors
     t_env.get_config().get_configuration().set_string(

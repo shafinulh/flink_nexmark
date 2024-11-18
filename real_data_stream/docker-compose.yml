@@ -13,31 +13,6 @@ services:
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
-        # RocksDB Cache Metrics
-        state.backend.rocksdb.metrics.block-cache-hit: true
-        state.backend.rocksdb.metrics.block-cache-miss: true
-        state.backend.rocksdb.metrics.block-cache-usage: true
-        state.backend.rocksdb.metrics.block-cache-capacity: true
-        # RocksDB I/O Metrics
-        state.backend.rocksdb.metrics.bytes-read: true
-        state.backend.rocksdb.metrics.bytes-written: true
-        # RocksDB Memory & State Size Metrics
-        state.backend.rocksdb.metrics.cur-size-all-mem-tables: true
-        state.backend.rocksdb.metrics.size-all-mem-tables: true
-        state.backend.rocksdb.metrics.estimate-table-readers-mem: true
-        state.backend.rocksdb.metrics.is-write-stopped: true
-        state.backend.rocksdb.metrics.num-entries-active-mem-table: true
-        # RocksDB Compaction Metrics
-        state.backend.rocksdb.metrics.num-running-compactions: true
-        state.backend.rocksdb.metrics.num-running-flushes: true
-        state.backend.rocksdb.metrics.compaction-pending: true
-        state.backend.rocksdb.metrics.estimate-pending-compaction-bytes: true
-        state.backend.rocksdb.metrics.compaction-write-bytes: true
-        state.backend.rocksdb.metrics.compaction-read-bytes: true
-        state.backend.rocksdb.metrics.estimate-num-keys: true
-        state.backend.rocksdb.metrics.estimate-live-data-size: true
-        state.backend.rocksdb.metrics.num-snapshots: true
-        state.backend.rocksdb.metrics.stall-micros: true
       - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
     networks:
       - nexmark-network
@@ -52,6 +27,8 @@ services:
     scale: 1
     ports:
       - "9249"
+      - "8849:8849"
+      - "1099:1099"
     environment:
       - |
         FLINK_PROPERTIES=
@@ -59,39 +36,39 @@ services:
         taskmanager.cpu.cores: 8.0 
         taskmanager.numberOfTaskSlots: 2
         taskmanager.numberOfTaskManagers: 1
-        metrics.reporters: prom
+        metrics.reporters: prom,jmx
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
+        metrics.reporter.jmx.factory.class: org.apache.flink.metrics.jmx.JMXReporterFactory
+        jmx.server.port: 8849
+        env.java.opts: "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8849 -Dcom.sun.management.jmxremote.rmi.port=8849 -Djava.rmi.server.hostname=0.0.0.0 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.registry.port=1099 -Djava.rmi.registry.port=1099"
+        # RocksDB Configuration
+        # state.backend.rocksdb.log.max-file-size: 10MB
+        # state.backend.rocksdb.log.file-num: 4
+        # state.backend.rocksdb.log.dir: /dev/null
+        # state.backend.rocksdb.compaction.level.target-file-size-base : 32MB
+        state.backend.rocksdb.block.cache.index.filter.blocks: false
+        # state.backend.rocksdb.memory.high-prio-pool-ratio : 0.85
+        # state.backend.rocksdb.memory.write-buffer-ratio : 0.15
         # RocksDB Cache Metrics
+        state.backend.rocksdb.metrics.block-cache-capacity: true
+        state.backend.rocksdb.metrics.block-cache-usage: true
         state.backend.rocksdb.metrics.block-cache-hit: true
         state.backend.rocksdb.metrics.block-cache-miss: true
-        state.backend.rocksdb.metrics.block-cache-usage: true
-        state.backend.rocksdb.metrics.block-cache-capacity: true
+        state.backend.rocksdb.metrics.block-cache-pinned-usage: true
         # RocksDB I/O Metrics
         state.backend.rocksdb.metrics.bytes-read: true
+        state.backend.rocksdb.metrics.iter-bytes-read: true
         state.backend.rocksdb.metrics.bytes-written: true
         # RocksDB Memory & State Size Metrics
         state.backend.rocksdb.metrics.cur-size-all-mem-tables: true
-        state.backend.rocksdb.metrics.size-all-mem-tables: true
-        state.backend.rocksdb.metrics.estimate-table-readers-mem: true
-        state.backend.rocksdb.metrics.is-write-stopped: true
-        state.backend.rocksdb.metrics.num-entries-active-mem-table: true
-        # RocksDB Compaction Metrics
-        state.backend.rocksdb.metrics.num-running-compactions: true
-        state.backend.rocksdb.metrics.num-running-flushes: true
-        state.backend.rocksdb.metrics.compaction-pending: true
-        state.backend.rocksdb.metrics.estimate-pending-compaction-bytes: true
-        state.backend.rocksdb.metrics.compaction-write-bytes: true
-        state.backend.rocksdb.metrics.compaction-read-bytes: true
-        state.backend.rocksdb.metrics.estimate-num-keys: true
-        state.backend.rocksdb.metrics.estimate-live-data-size: true
-        state.backend.rocksdb.metrics.num-snapshots: true
-        state.backend.rocksdb.metrics.stall-micros: true
       - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
     networks:
       - nexmark-network
     extra_hosts:
       - "kafka1:172.18.0.3"
+    volumes:
+    - ./log:/opt/flink/log
 
   prometheus:
     image: prom/prometheus:v2.44.0
