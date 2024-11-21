@@ -36,7 +36,7 @@ services:
         taskmanager.cpu.cores: 8.0 
         taskmanager.numberOfTaskSlots: 1
         taskmanager.numberOfTaskManagers: 1
-        taskmanager.memory.managed.fraction: 0.3
+        taskmanager.memory.managed.fraction: 0.2
         metrics.reporters: prom,jmx
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
@@ -64,6 +64,9 @@ services:
         state.backend.rocksdb.metrics.bytes-written: true
         # RocksDB Memory & State Size Metrics
         state.backend.rocksdb.metrics.cur-size-all-mem-tables: true
+        state.backend.rocksdb.metrics.size-all-mem-tables: true
+        # This tells us how much memory used for SSTables NOT in Block Cache
+        state.backend.rocksdb.metrics.estimate-table-readers-mem: true
       - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
     networks:
       - nexmark-network
