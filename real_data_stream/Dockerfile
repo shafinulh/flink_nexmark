@@ -13,6 +13,10 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 # Set JAVA_HOME for ARM64
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-arm64
 
+# # Fix permissions for flink-conf.yaml
+# RUN chown -R root:root $FLINK_HOME && \
+#     chmod -R g+rw $FLINK_HOME
+
 # Download Flink connectors and PostgreSQL JDBC driver
 RUN wget -P /opt/flink/lib/ https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-kafka/1.17.0/flink-sql-connector-kafka-1.17.0.jar && \
     wget -P /opt/flink/lib/ https://repo.maven.apache.org/maven2/org/apache/flink/flink-connector-jdbc/3.0.0-1.16/flink-connector-jdbc-3.0.0-1.16.jar && \

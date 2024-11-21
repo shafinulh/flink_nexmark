@@ -51,7 +51,10 @@ services:
         # state.backend.rocksdb.block.cache.index.filter.blocks: false
         # state.backend.rocksdb.memory.high-prio-pool-ratio : 0.025
         # state.backend.rocksdb.memory.write-buffer-ratio : 0.15
-        # state.backend.rocksdb.options-factory: com.example.CustomRocksDBOptionsFactory
+        state.backend.rocksdb.options-factory: com.example.CustomRocksDBOptionsFactory
+        # NEW OPTIONS
+        state.backend.rocksdb.memory.managed: false
+        # state.backend.rocksdb.block.cache-size: 213MB
         # RocksDB Cache Metrics
         state.backend.rocksdb.metrics.block-cache-capacity: true
         state.backend.rocksdb.metrics.block-cache-usage: true
