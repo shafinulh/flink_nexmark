@@ -3,6 +3,7 @@ FROM flink:1.17.0
 # Install JDK, python3, pip3, and other dependencies
 RUN apt-get update -y && \
     apt-get install -y sysstat procps && \
+    apt-get install -y rocksdb-tools && \
     apt-get install -y openjdk-11-jdk-headless python3 python3-pip python3-dev wget && \
     rm -rf /var/lib/apt/lists/*
 
