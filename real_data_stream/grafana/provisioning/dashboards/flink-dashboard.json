@@ -234,6 +234,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -292,7 +293,7 @@
         "x": 0,
         "y": 8
       },
-      "id": 18,
+      "id": 19,
       "options": {
         "legend": {
           "calcs": [],
@@ -312,13 +313,25 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "flink_taskmanager_job_task_operator_rocksdb_block_cache_index_miss",
+          "expr": "flink_taskmanager_job_task_operator_rocksdb_block_cache_index_hit",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "flink_taskmanager_job_task_operator_rocksdb_block_cache_index_miss",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "Index Miss",
+      "title": "Index Hit/Miss",
       "type": "timeseries"
     },
     {
@@ -404,7 +417,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(flink_taskmanager_job_task_operator_rocksdb_block_cache_filter_hit[1m])",
+          "expr": "flink_taskmanager_job_task_operator_left_records_rocksdb_estimate_table_readers_mem/1048576",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -415,14 +428,14 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(flink_taskmanager_job_task_operator_rocksdb_block_cache_filter_miss[5m])",
+          "expr": "flink_taskmanager_job_task_operator_right_records_rocksdb_estimate_table_readers_mem/1048576",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "filter hit/miss",
+      "title": "Estimate Table Readers",
       "type": "timeseries"
     },
     {
@@ -480,32 +493,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "{__name__=\"flink_taskmanager_job_task_operator_rocksdb_block_cache_index_miss\", host=\"172_18_0_11\", instance=\"taskmanager\", job=\"flink\", job_id=\"a5212334bc7c967a3646c6f5872d5f75\", job_name=\"insert_into_default_catalog_default_database_q3_sink\", operator_id=\"a3603f093ea43c43504d1a05f8673e75\", operator_name=\"Join_6_\", subtask_index=\"0\", task_attempt_id=\"7ef2f94e657d6060bd46e09844dbf0bf_a3603f093ea43c43504d1a05f8673e75_0_0\", task_attempt_num=\"0\", task_id=\"a3603f093ea43c43504d1a05f8673e75\", task_name=\"Join_6_____Calc_7_____ConstraintEnforcer_8_____Sink:_q3_sink_8_\", tm_id=\"172_18_0_11:33703_835a96\"}"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -513,7 +501,7 @@
         "x": 0,
         "y": 16
       },
-      "id": 15,
+      "id": 18,
       "options": {
         "legend": {
           "calcs": [],
@@ -533,25 +521,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "flink_taskmanager_job_task_operator_rocksdb_block_cache_index_hit\n",
+          "expr": "flink_taskmanager_job_task_operator_rocksdb_block_cache_index_miss",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "flink_taskmanager_job_task_operator_rocksdb_block_cache_index_miss",
-          "hide": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "B"
         }
       ],
-      "title": "Index Hit/Miss",
+      "title": "Index Miss",
       "type": "timeseries"
     },
     {
@@ -1497,7 +1473,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1588,7 +1565,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",

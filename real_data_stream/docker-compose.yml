@@ -26,16 +26,15 @@ services:
     command: taskmanager
     scale: 1
     ports:
-      - "9249"
-      - "8849:8849"
-      - "1099:1099"
+      - "9249" 
+      - "8849"
+      - "1099"
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.cpu.cores: 8.0 
-        taskmanager.numberOfTaskSlots: 1
-        taskmanager.numberOfTaskManagers: 1
+        taskmanager.numberOfTaskSlots: 4
         taskmanager.memory.managed.fraction: 0.2
         metrics.reporters: prom,jmx
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory

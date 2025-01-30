@@ -14,13 +14,13 @@ public class CustomRocksDBOptionsFactory implements RocksDBOptionsFactory {
     
     // Memory configuration constants
     private static final double HIGH_PRIORITY_POOL_RATIO = 0.1;
-    private static final long BLOCK_CACHE_SIZE = 213 * 1024 * 1024; 
+    private static final long BLOCK_CACHE_SIZE = 107 * 1024 * 1024; 
     private static final long WRITE_BUFFER_SIZE = 64 * 1024 * 1024;
-    private static final long TOTAL_WRITE_BUFFER_LIMIT = 85 * 1024 * 1024;
+    private static final long TOTAL_WRITE_BUFFER_LIMIT = 170 * 1024 * 1024;
 
     @Override
-    public DBOptions createDBOptions(DBOptions currentOptions, Collection<AutoCloseable> handlesToClose) {
-        Cache cache = new LRUCache(BLOCK_CACHE_SIZE, -1, false, HIGH_PRIORITY_POOL_RATIO);
+    public DBOptions createDBOptions(DBOptions currentptions, Collection<AutoCloseable> handlesToClose) {
+        Cache cache = new LRUCache(BLOCK_CACHE_SIZE, 1, false, HIGH_PRIORITY_POOL_RATIO);
         handlesToClose.add(cache);
 
         WriteBufferManager writeBufferManager = new WriteBufferManager(TOTAL_WRITE_BUFFER_LIMIT, cache);
@@ -31,7 +31,7 @@ public class CustomRocksDBOptionsFactory implements RocksDBOptionsFactory {
         handlesToClose.add(statistics);
 
         return currentOptions
-                .setTableCacheNumshardbits(6)
+                .setTableCacheNumshardbits(1)
                 .setWriteBufferManager(writeBufferManager)
                 .setStatistics(statistics);
     }
@@ -72,9 +72,9 @@ public class CustomRocksDBOptionsFactory implements RocksDBOptionsFactory {
                 .orElseThrow(() -> new RuntimeException("Cache not found"));
 
         BlockBasedTableConfig tableConfig = new BlockBasedTableConfig()
-                .setCacheIndexAndFilterBlocks(false)
-                .setCacheIndexAndFilterBlocksWithHighPriority(false)
-                .setPinL0FilterAndIndexBlocksInCache(false)
+                .setCacheIndexAndFilterBlocks(true)
+                .setCacheIndexAndFilterBlocksWithHighPriority(true)
+                .setPinL0FilterAndIndexBlocksInCache(true)
                 .setBlockCache(cache);
 
         return currentOptions
