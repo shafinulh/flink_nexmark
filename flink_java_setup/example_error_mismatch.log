@@ -1,0 +1,224 @@
+WARNING: Unknown module: jdk.compiler specified to --add-exports
+WARNING: Unknown module: jdk.compiler specified to --add-exports
+WARNING: Unknown module: jdk.compiler specified to --add-exports
+WARNING: Unknown module: jdk.compiler specified to --add-exports
+WARNING: Unknown module: jdk.compiler specified to --add-exports
+Executing SQL: -- Define the Kafka source table
+CREATE TABLE nexmark_events (
+    event_type INT,
+    person ROW<
+        id BIGINT,
+        name VARCHAR,
+        emailAddress VARCHAR,
+        creditCard VARCHAR,
+        city VARCHAR,
+        state VARCHAR,
+        date_time TIMESTAMP(3),
+        extra VARCHAR>,
+    auction ROW<
+        id BIGINT,
+        itemName VARCHAR,
+        description VARCHAR,
+        initial_bid BIGINT,
+        reserve BIGINT,
+        date_time TIMESTAMP(3),
+        expires TIMESTAMP(3),
+        seller BIGINT,
+        category BIGINT,
+        extra VARCHAR>,
+    bid ROW<
+        auction BIGINT,
+        bidder BIGINT,
+        price BIGINT,
+        channel VARCHAR,
+        url VARCHAR,
+        date_time TIMESTAMP(3),
+        extra VARCHAR>,
+    date_time AS
+        CASE
+            WHEN event_type = 0 THEN person.date_time
+            WHEN event_type = 1 THEN auction.date_time
+            ELSE bid.date_time
+        END,
+    WATERMARK FOR date_time AS date_time - INTERVAL '4' SECOND
+) WITH (
+    'connector' = 'kafka',
+    'topic' = 'nexmark-events',
+    'properties.bootstrap.servers' = 'kafka1:19092',
+    'properties.group.id' = 'nexmark-flink-consumer',
+    'scan.startup.mode' = 'earliest-offset',
+    'format' = 'json'
+)
+Executing SQL: -- Create view for person events
+CREATE VIEW person AS
+SELECT 
+    person.id,
+    person.name,
+    person.emailAddress,
+    person.creditCard,
+    person.city,
+    person.state,
+    person.date_time,
+    person.extra
+FROM nexmark_events WHERE event_type = 0
+Executing SQL: -- Create view for auction events
+CREATE VIEW auction AS
+SELECT 
+    auction.id,
+    auction.itemName,
+    auction.description,
+    auction.initial_bid,
+    auction.reserve,
+    auction.date_time,
+    auction.expires,
+    auction.seller,
+    auction.category,
+    auction.extra
+FROM nexmark_events WHERE event_type = 1
+Executing SQL: -- Create the PostgreSQL sink table
+CREATE TABLE q3_sink (
+    name VARCHAR,
+    city VARCHAR,
+    state VARCHAR,
+    id BIGINT,
+    auction_date_time TIMESTAMP (3),
+    processing_time TIMESTAMP(3),
+    PRIMARY KEY (id) NOT ENFORCED
+) WITH (
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://postgres:5432/nexmark',
+    'table-name' = 'nexmark.q3_results',
+    'username' = 'postgres',
+    'password' = 'postgres',
+    'sink.parallelism' = '4',
+    'sink.buffer-flush.interval' = '1s'
+)
+Executing SQL: -- Modified query with processing time
+INSERT INTO q3_sink
+SELECT
+    P.name, 
+    P.city, 
+    P.state, 
+    A.id,
+    A.date_time,
+    PROCTIME() as processing_time
+FROM
+    auction AS A 
+    INNER JOIN person AS P ON A.seller = P.id
+WHERE
+    A.category = 10 AND (P.state = 'or' OR P.state = 'id' OR P.state = 'ca')
+
+------------------------------------------------------------
+ The program finished with the following exception:
+
+org.apache.flink.client.program.ProgramInvocationException: The main method caused an error: Failed to execute sql
+	at org.apache.flink.client.program.PackagedProgram.callMainMethod(PackagedProgram.java:372)
+	at org.apache.flink.client.program.PackagedProgram.invokeInteractiveModeForExecution(PackagedProgram.java:222)
+	at org.apache.flink.client.ClientUtils.executeProgram(ClientUtils.java:105)
+	at org.apache.flink.client.cli.CliFrontend.executeProgram(CliFrontend.java:851)
+	at org.apache.flink.client.cli.CliFrontend.run(CliFrontend.java:245)
+	at org.apache.flink.client.cli.CliFrontend.parseAndRun(CliFrontend.java:1095)
+	at org.apache.flink.client.cli.CliFrontend.lambda$mainInternal$9(CliFrontend.java:1189)
+	at org.apache.flink.runtime.security.contexts.NoOpSecurityContext.runSecured(NoOpSecurityContext.java:28)
+	at org.apache.flink.client.cli.CliFrontend.mainInternal(CliFrontend.java:1189)
+	at org.apache.flink.client.cli.CliFrontend.main(CliFrontend.java:1157)
+Caused by: org.apache.flink.table.api.TableException: Failed to execute sql
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeInternal(TableEnvironmentImpl.java:1048)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeInternal(TableEnvironmentImpl.java:864)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeInternal(TableEnvironmentImpl.java:1097)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeSql(TableEnvironmentImpl.java:735)
+	at com.example.NexmarkJob.lambda$main$1(NexmarkJob.java:33)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(Unknown Source)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(Unknown Source)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(Unknown Source)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Unknown Source)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(Unknown Source)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(Unknown Source)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(Unknown Source)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(Unknown Source)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(Unknown Source)
+	at java.base/java.util.stream.ReferencePipeline.forEach(Unknown Source)
+	at com.example.NexmarkJob.main(NexmarkJob.java:31)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.apache.flink.client.program.PackagedProgram.callMainMethod(PackagedProgram.java:355)
+	... 9 more
+Caused by: org.apache.flink.util.FlinkException: Failed to execute job 'insert-into_default_catalog.default_database.q3_sink'.
+	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.executeAsync(StreamExecutionEnvironment.java:2253)
+	at org.apache.flink.client.program.StreamContextEnvironment.executeAsync(StreamContextEnvironment.java:189)
+	at org.apache.flink.table.planner.delegation.DefaultExecutor.executeAsync(DefaultExecutor.java:110)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeInternal(TableEnvironmentImpl.java:1020)
+	... 29 more
+Caused by: java.lang.RuntimeException: org.apache.flink.runtime.client.JobInitializationException: Could not start the JobMaster.
+	at org.apache.flink.util.ExceptionUtils.rethrow(ExceptionUtils.java:321)
+	at org.apache.flink.util.function.FunctionUtils.lambda$uncheckedFunction$2(FunctionUtils.java:75)
+	at java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(Unknown Source)
+	at java.base/java.util.concurrent.CompletableFuture$Completion.exec(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinTask.doExec(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinPool.scan(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinPool.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinWorkerThread.run(Unknown Source)
+Caused by: org.apache.flink.runtime.client.JobInitializationException: Could not start the JobMaster.
+	at org.apache.flink.runtime.jobmaster.DefaultJobMasterServiceProcess.lambda$new$0(DefaultJobMasterServiceProcess.java:97)
+	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.util.concurrent.CompletionException: java.lang.RuntimeException: org.apache.flink.runtime.JobException: Cannot instantiate the coordinator for operator Source: nexmark_events[1] -> (Calc[2], Calc[4])
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(Unknown Source)
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(Unknown Source)
+	... 4 more
+Caused by: java.lang.RuntimeException: org.apache.flink.runtime.JobException: Cannot instantiate the coordinator for operator Source: nexmark_events[1] -> (Calc[2], Calc[4])
+	at org.apache.flink.util.ExceptionUtils.rethrow(ExceptionUtils.java:321)
+	at org.apache.flink.util.function.FunctionUtils.lambda$uncheckedSupplier$4(FunctionUtils.java:114)
+	... 4 more
+Caused by: org.apache.flink.runtime.JobException: Cannot instantiate the coordinator for operator Source: nexmark_events[1] -> (Calc[2], Calc[4])
+	at org.apache.flink.runtime.executiongraph.ExecutionJobVertex.initialize(ExecutionJobVertex.java:234)
+	at org.apache.flink.runtime.executiongraph.DefaultExecutionGraph.initializeJobVertex(DefaultExecutionGraph.java:894)
+	at org.apache.flink.runtime.executiongraph.ExecutionGraph.initializeJobVertex(ExecutionGraph.java:224)
+	at org.apache.flink.runtime.executiongraph.DefaultExecutionGraph.initializeJobVertices(DefaultExecutionGraph.java:875)
+	at org.apache.flink.runtime.executiongraph.DefaultExecutionGraph.attachJobGraph(DefaultExecutionGraph.java:829)
+	at org.apache.flink.runtime.executiongraph.DefaultExecutionGraphBuilder.buildGraph(DefaultExecutionGraphBuilder.java:221)
+	at org.apache.flink.runtime.scheduler.DefaultExecutionGraphFactory.createAndRestoreExecutionGraph(DefaultExecutionGraphFactory.java:163)
+	at org.apache.flink.runtime.scheduler.SchedulerBase.createAndRestoreExecutionGraph(SchedulerBase.java:371)
+	at org.apache.flink.runtime.scheduler.SchedulerBase.<init>(SchedulerBase.java:214)
+	at org.apache.flink.runtime.scheduler.DefaultScheduler.<init>(DefaultScheduler.java:140)
+	at org.apache.flink.runtime.scheduler.DefaultSchedulerFactory.createInstance(DefaultSchedulerFactory.java:156)
+	at org.apache.flink.runtime.jobmaster.DefaultSlotPoolServiceSchedulerFactory.createScheduler(DefaultSlotPoolServiceSchedulerFactory.java:122)
+	at org.apache.flink.runtime.jobmaster.JobMaster.createScheduler(JobMaster.java:379)
+	at org.apache.flink.runtime.jobmaster.JobMaster.<init>(JobMaster.java:356)
+	at org.apache.flink.runtime.jobmaster.factories.DefaultJobMasterServiceFactory.internalCreateJobMasterService(DefaultJobMasterServiceFactory.java:128)
+	at org.apache.flink.runtime.jobmaster.factories.DefaultJobMasterServiceFactory.lambda$createJobMasterService$0(DefaultJobMasterServiceFactory.java:100)
+	at org.apache.flink.util.function.FunctionUtils.lambda$uncheckedSupplier$4(FunctionUtils.java:112)
+	... 4 more
+Caused by: java.lang.ClassCastException: cannot assign instance of org.apache.kafka.clients.consumer.OffsetResetStrategy to field org.apache.flink.connector.kafka.source.enumerator.initializer.ReaderHandledOffsetsInitializer.offsetResetStrategy of type org.apache.kafka.clients.consumer.OffsetResetStrategy in instance of org.apache.flink.connector.kafka.source.enumerator.initializer.ReaderHandledOffsetsInitializer
+	at java.base/java.io.ObjectStreamClass$FieldReflector.setObjFieldValues(Unknown Source)
+	at java.base/java.io.ObjectStreamClass$FieldReflector.checkObjectFieldValueTypes(Unknown Source)
+	at java.base/java.io.ObjectStreamClass.checkObjFieldValueTypes(Unknown Source)
+	at java.base/java.io.ObjectInputStream.defaultCheckFieldValues(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readSerialData(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readOrdinaryObject(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readObject0(Unknown Source)
+	at java.base/java.io.ObjectInputStream.defaultReadFields(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readSerialData(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readOrdinaryObject(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readObject0(Unknown Source)
+	at java.base/java.io.ObjectInputStream.defaultReadFields(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readSerialData(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readOrdinaryObject(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readObject0(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readObject(Unknown Source)
+	at java.base/java.io.ObjectInputStream.readObject(Unknown Source)
+	at org.apache.flink.util.InstantiationUtil.deserializeObject(InstantiationUtil.java:539)
+	at org.apache.flink.util.InstantiationUtil.deserializeObject(InstantiationUtil.java:527)
+	at org.apache.flink.util.SerializedValue.deserializeValue(SerializedValue.java:67)
+	at org.apache.flink.runtime.operators.coordination.OperatorCoordinatorHolder.create(OperatorCoordinatorHolder.java:477)
+	at org.apache.flink.runtime.executiongraph.ExecutionJobVertex.createOperatorCoordinatorHolder(ExecutionJobVertex.java:292)
+	at org.apache.flink.runtime.executiongraph.ExecutionJobVertex.initialize(ExecutionJobVertex.java:225)
+	... 20 more
