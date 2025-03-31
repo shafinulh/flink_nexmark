@@ -1,5 +1,12 @@
 package com.example;
 
+import org.apache.flink.api.common.RuntimeExecutionMode;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.CoreOptions;
+import org.apache.flink.configuration.PipelineOptions;
+import org.apache.flink.configuration.StateBackendOptions;
+import static org.apache.flink.configuration.StateBackendOptions.STATE_BACKEND_CACHE_SIZE;
+import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -11,20 +18,24 @@ import java.util.Arrays;
 
 public class NexmarkJob {
     public static void main(String[] args) throws Exception {
-        // Set up the Flink streaming environment
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        // Create Flink config and modify it
+        Configuration config = new Configuration();
+        config.set(CoreOptions.DEFAULT_PARALLELISM, 2);
+        config.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
+        // config.set(STATE_BACKEND_CACHE_SIZE, 500);
+
+        // Set up environments with custom config
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(config);
+        env.setRuntimeMode(RuntimeExecutionMode.STREAMING);
+        env.setStateBackend(new RocksDBStateBackend("file:///tmp/flink-checkpoints", true));
+
         EnvironmentSettings settings = EnvironmentSettings.newInstance()
                 .inStreamingMode()
                 .build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
-        // Optional: set parallelism or RocksDB config
-        env.setParallelism(2);
-
-        // Read the SQL file
+        // Load SQL and execute statements
         String sql = new String(Files.readAllBytes(Paths.get("/opt/flink/sql/q3.sql")));
-
-        // Execute each statement individually
         Arrays.stream(sql.split(";"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())

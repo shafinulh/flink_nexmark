@@ -31,6 +31,19 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <!-- Flink State Backend -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-statebackend-rocksdb</artifactId>
+            <version>1.18.0-thesis-mar-31-25</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-core</artifactId>
+            <version>1.18.0-thesis-mar-31-25</version>
+        </dependency>
+
         <!-- Kafka Connector -->
         <!-- <dependency>
             <groupId>org.apache.flink</groupId>
