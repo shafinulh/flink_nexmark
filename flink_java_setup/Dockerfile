@@ -1,4 +1,4 @@
-FROM flink:1.18.0-test
+FROM flink:1.18.0
 
 # copy the nexmark jar and sql files
 COPY target/flink-nexmark-java-1.0-SNAPSHOT-jar-with-dependencies.jar /opt/flink/usrlib/

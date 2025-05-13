@@ -22,7 +22,7 @@ public class NexmarkJob {
         Configuration config = new Configuration();
         config.set(CoreOptions.DEFAULT_PARALLELISM, 2);
         config.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
-        // config.set(STATE_BACKEND_CACHE_SIZE, 500);
+        config.set(STATE_BACKEND_CACHE_SIZE, 50000);
 
         // Set up environments with custom config
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(config);

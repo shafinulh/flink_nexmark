@@ -37,12 +37,13 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        # TASK MANAGER PROPERTIES
-        taskmanager.cpu.cores: 4.0 
+        ############################### TASK MANAGER PROPERTIES #################################
+        taskmanager.cpu.cores: 8.0 
         taskmanager.numberOfTaskSlots: 4
-        # ROCKSBD FLINK API
+        ############################### ROCKSBD FLINK API #################################
         state.backend: rocksdb
         state.backend.rocksdb.options-factory: com.example.CustomRocksDBOptionsFactory
+        state.backend.rocksdb.memory.managed: false
         ################################ METRICS TRACKING ########################################
         ################################ CACHE METRICS ###########################################
         state.backend.rocksdb.metrics.block-cache-capacity: true
@@ -60,6 +61,7 @@ services:
         ## This tells us how much memory used for SSTables NOT in Block Cache
         state.backend.rocksdb.metrics.estimate-table-readers-mem: true
         ##########################################################################################
+        
         # METRICS INTEGRATION
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
@@ -71,6 +73,7 @@ services:
       - "kafka1:172.18.0.3"
     volumes:
       - ./rocksdb-options/target/rocksdb-options-1.0-SNAPSHOT.jar:/opt/flink/lib/rocksdb-options.jar
+      - ./log:/opt/flink/log
     restart: on-failure
 
   postgres:
