@@ -1,13 +1,9 @@
 # Ignore data logs and temporary files
 old_pyflink_setup/log/
-*.log
-*.txt
-*.json
-tmp_tm*
+flink_java_setup/log/
 
 # Ignore macOS system files
 .DS_Store
 
 # Ignore personal notes
-todo.md
-useful_commands.md
+notes/
