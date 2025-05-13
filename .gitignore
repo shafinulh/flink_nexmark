@@ -1,0 +1,13 @@
+# Ignore data logs and temporary files
+real_data_stream/log/
+*.log
+*.txt
+*.json
+tmp_tm*
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore personal notes
+todo.md
+useful_commands.md
