@@ -1,5 +1,5 @@
 # Ignore data logs and temporary files
-real_data_stream/log/
+old_pyflink_setup/log/
 *.log
 *.txt
 *.json
