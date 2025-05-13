@@ -2,6 +2,11 @@
 old_pyflink_setup/log/
 flink_java_setup/log/
 
+# Ignore project build artifacts
+flink_java_setup/target/
+flink_java_setup/rocksdb-options/target
+old_pyflink_setup/rocksdb-options/target
+
 # Ignore macOS system files
 .DS_Store
 
