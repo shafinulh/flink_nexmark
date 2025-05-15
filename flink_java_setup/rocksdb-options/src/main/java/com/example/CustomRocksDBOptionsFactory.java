@@ -56,6 +56,9 @@ public class CustomRocksDBOptionsFactory implements RocksDBOptionsFactory {
             monitorTickerTypes.add(TickerType.BLOCK_CACHE_DATA_HIT);
             monitorTickerTypes.add(TickerType.BLOCK_CACHE_BYTES_READ);
             monitorTickerTypes.add(TickerType.BLOCK_CACHE_BYTES_WRITE);
+            // for monitoring compactions?
+            monitorTickerTypes.add(TickerType.COMPACTION_KEY_DROP_OBSOLETE);
+            monitorTickerTypes.add(TickerType.COMPACTION_KEY_DROP_USER);
             
             return nativeMetricOptions;
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -72,9 +75,9 @@ public class CustomRocksDBOptionsFactory implements RocksDBOptionsFactory {
                 .orElseThrow(() -> new RuntimeException("Cache not found"));
 
         BlockBasedTableConfig tableConfig = new BlockBasedTableConfig()
-                .setCacheIndexAndFilterBlocks(true)
-                .setCacheIndexAndFilterBlocksWithHighPriority(true)
-                .setPinL0FilterAndIndexBlocksInCache(true)
+                .setCacheIndexAndFilterBlocks(false)
+                .setCacheIndexAndFilterBlocksWithHighPriority(false)
+                .setPinL0FilterAndIndexBlocksInCache(false)
                 .setBlockCache(cache);
 
         return currentOptions

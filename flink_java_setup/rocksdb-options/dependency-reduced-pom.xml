@@ -32,13 +32,13 @@
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-core</artifactId>
-      <version>1.17.1</version>
+      <version>1.18.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-streaming-java</artifactId>
-      <version>1.17.1</version>
+      <version>1.18.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -46,6 +46,6 @@
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <flink.version>1.17.1</flink.version>
+    <flink.version>1.18.0</flink.version>
   </properties>
 </project>

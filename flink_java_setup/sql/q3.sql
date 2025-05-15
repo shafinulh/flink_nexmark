@@ -88,7 +88,7 @@ CREATE TABLE q3_sink (
     'table-name' = 'nexmark.q3_results',
     'username' = 'postgres',
     'password' = 'postgres',
-    'sink.parallelism' = '2',
+    'sink.parallelism' = '1',
     'sink.buffer-flush.interval' = '1s'
 );
 

@@ -20,7 +20,7 @@ public class NexmarkJob {
     public static void main(String[] args) throws Exception {
         // Create Flink config and modify it
         Configuration config = new Configuration();
-        config.set(CoreOptions.DEFAULT_PARALLELISM, 2);
+        config.set(CoreOptions.DEFAULT_PARALLELISM, 1);
         config.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
         // config.set(STATE_BACKEND_CACHE_SIZE, 50000);
 
