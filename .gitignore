@@ -1,6 +1,7 @@
 # Ignore data logs and temporary files
 old_pyflink_setup/log/
 flink_java_setup/log/
+flink_java_setup/rocksdb_log/
 
 # Ignore project build artifacts
 flink_java_setup/target/

@@ -38,7 +38,7 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         ############################### TASK MANAGER PROPERTIES ##################################
-        taskmanager.cpu.cores: 2.0
+        taskmanager.cpu.cores: 4.0
         taskmanager.numberOfTaskSlots: 1
         ############################### ROCKSBD FLINK API ########################################
         state.backend: rocksdb
@@ -46,7 +46,9 @@ services:
         state.backend.rocksdb.memory.managed: false
 
         ###################### ACCESS LATENCY TRACKING - impacts perf ############################
-        state.backend.latency-track.keyed-state-enabled: false
+        state.backend.latency-track.keyed-state-enabled: true
+        state.backend.latency-track.sample-interval: 10
+        state.backend.latency-track.history-size: 10000
 
         ###################### RocksDB Memory Metrics ################################
         state.backend.rocksdb.metrics.cur-size-all-mem-tables: true
@@ -82,6 +84,7 @@ services:
     volumes:
       - ./rocksdb-options/target/rocksdb-options-1.0-SNAPSHOT.jar:/opt/flink/lib/rocksdb-options.jar
       - ./log:/opt/flink/log
+      - ./rocksdb_log:/opt/flink/rocksdb_native_logs
     restart: on-failure
 
   postgres:
