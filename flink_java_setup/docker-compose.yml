@@ -10,19 +10,20 @@ services:
       - "8081:8081"
       - "9249:9249"
     environment:
-      - |
-        FLINK_PROPERTIES=
+      FLINK_PROPERTIES: |-
         jobmanager.rpc.address: jobmanager
         state.checkpoints.dir: file:///tmp/flink-checkpoints
         state.savepoints.dir: file:///tmp/flink-savepoints
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
-      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
+      KAFKA_BOOTSTRAP_SERVERS: kafka1:19092
     networks:
       - nexmark-network
     extra_hosts:
       - "kafka1:172.18.0.3"
+    volumes:
+      - ./savepoints:/tmp/flink-savepoints
 
   taskmanager:
     build: .
@@ -34,19 +35,18 @@ services:
     ports:
       - "9249"
     environment:
-      - |
-        FLINK_PROPERTIES=
+      FLINK_PROPERTIES: |-
         jobmanager.rpc.address: jobmanager
         ############################### TASK MANAGER PROPERTIES ##################################
-        taskmanager.cpu.cores: 4.0
-        taskmanager.numberOfTaskSlots: 1
+        taskmanager.cpu.cores: 10.0
+        taskmanager.numberOfTaskSlots: 4
         ############################### ROCKSBD FLINK API ########################################
-        state.backend: rocksdb
+        state.backend.type: rocksdb
         state.backend.rocksdb.options-factory: com.example.CustomRocksDBOptionsFactory
         state.backend.rocksdb.memory.managed: false
 
         ###################### ACCESS LATENCY TRACKING - impacts perf ############################
-        state.backend.latency-track.keyed-state-enabled: true
+        state.backend.latency-track.keyed-state-enabled: false
         state.backend.latency-track.sample-interval: 10
         state.backend.latency-track.history-size: 10000
 
@@ -66,6 +66,23 @@ services:
         state.backend.rocksdb.metrics.bytes-read: true
         state.backend.rocksdb.metrics.bytes-written: true
 
+        ################################ SST Files #############################################
+        state.backend.rocksdb.metrics.num-files-at-level-base: true
+        state.backend.rocksdb.metrics.num-files-at-level0: true
+        state.backend.rocksdb.metrics.num-files-at-level1: true
+        state.backend.rocksdb.metrics.num-files-at-level2: true
+
+        # Total number of live SST files
+        state.backend.rocksdb.metrics.num-live-versions: true
+
+        # Number of immutable memtables (pending flush to SST)
+        state.backend.rocksdb.metrics.num-immutable-mem-table: true
+
+        # Total SST files size
+        state.backend.rocksdb.metrics.total-sst-files-size: true
+        state.backend.rocksdb.metrics.live-sst-files-size: true
+        state.backend.rocksdb.metrics.estimate-num-keys: true
+
         ########################### INTERESTING ############################################
         state.backend.rocksdb.metrics.stall-micros: true
         state.backend.rocksdb.metrics.compaction-pending: true
@@ -76,7 +93,7 @@ services:
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
-      - KAFKA_BOOTSTRAP_SERVERS=kafka1:19092
+      KAFKA_BOOTSTRAP_SERVERS: kafka1:19092
     networks:
       - nexmark-network
     extra_hosts:
@@ -84,6 +101,7 @@ services:
     volumes:
       - ./rocksdb-options/target/rocksdb-options-1.0-SNAPSHOT.jar:/opt/flink/lib/rocksdb-options.jar
       - ./log:/opt/flink/log
+      - ./savepoints:/tmp/flink-savepoints
       - ./rocksdb_log:/opt/flink/rocksdb_native_logs
     restart: on-failure
 

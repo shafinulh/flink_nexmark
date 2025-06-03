@@ -6,7 +6,7 @@ import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.StateBackendOptions;
 // import static org.apache.flink.configuration.StateBackendOptions.STATE_BACKEND_CACHE_SIZE;
-import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -22,12 +22,12 @@ public class NexmarkJob {
         Configuration config = new Configuration();
         config.set(CoreOptions.DEFAULT_PARALLELISM, 1);
         config.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
+        config.setString("state.checkpoints.dir", "file:///tmp/flink-checkpoints");
         // config.set(STATE_BACKEND_CACHE_SIZE, 50000);
 
         // Set up environments with custom config
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(config);
         env.setRuntimeMode(RuntimeExecutionMode.STREAMING);
-        env.setStateBackend(new RocksDBStateBackend("file:///tmp/flink-checkpoints", true));
 
         EnvironmentSettings settings = EnvironmentSettings.newInstance()
                 .inStreamingMode()
